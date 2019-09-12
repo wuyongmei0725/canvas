@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>cicle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            overflow: hidden;
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" style="position:absolute;">你的浏览器不支持canvas</canvas>
+    <script>
+        var canvas = document.getElementById('canvas');
+        canvas.width = window.innerWidth;
+        console.log(window.innerWidth)//当前窗口大小
+        canvas.height = window.innerHeight;
+        console.log(window.innerHeight)
+        var content2d = canvas.getContext('2d');//渲染上下文
+        var balls = [];//将渲染好的球放在数组里，删除的时候好实用splice（）
+        function ball() {
+            this.color = null;
+            this.r = null;
+            this.Angle = null;
+            this.x = null;
+            this.y = null;
+            this.AngleX = null;
+            this.AngleY = null;
+
+            this.init = function (x, y) {
+                this.color = this.randomColor();//产生一个随机颜色
+                this.x = x;
+                this.y = y;
+                this.r = this.randomNum(10, 15);//产生一个10-25的随机数
+                this.Angle = Math.random() * Math.PI * 2;//产生0-2PI的随机数
+                this.AngleX = this.randomNum(6, 12) * Math.cos(this.Angle);//产生产生6-12或者-6~-12之间的随机数
+                this.AngleY = this.randomNum(6, 12) * Math.sin(this.Angle);
+            };
+            this.move = function () {
+                this.x += this.AngleX;
+                this.y += this.AngleY;
+                this.r -=0.3;
+                this.AngleX *= 0.92;
+                this.AngleY *= 0.92;
+            }
+            this.randomColor = function () {
+                return '#' + parseInt(Math.random() * 16777216).toString(16);
+            }
+            this.randomNum = function (min, max) {
+                return Math.random() * max + min;
+            };
+        }
+        function createBall(x, y) {
+            var count = parseInt(Math.random() * 30 + 10);
+            for (var i = 0; i < count; i++) {
+                var b = new ball();
+                b.init(x, y);
+                balls.push(b);
+            }
+        }
+        function Draw() {
+            for (var i = 0; i < balls.length; i++) {
+                var b = balls[i];
+                content2d.beginPath();//清楚痕迹（必须！！！）
+                content2d.fillStyle = b.color;//填充颜色
+                content2d.arc(b.x, b.y, b.r, 0, Math.PI * 2);//绘制圆弧，0是开始弧度，Math.PI*2是结束弧度
+                content2d.fill();//填充
+                content2d.closePath();//自动完成闭合
+                b.move();
+            }
+        }
+        function removeBall() {
+            for (var i = 0; i < balls.length; i++) {
+                var b = balls[i];
+                if (b.r < 0.3) {
+                    balls.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+        canvas.onmouseup = function (e) {
+            var x = e.pageX;
+            var y = e.pageY;
+            createBall(x, y);
+        };
+        loop();
+        function loop() {
+            content2d.clearRect(0, 0, canvas.width, canvas.height);
+            Draw();
+            removeBall();
+            window.requestAnimationFrame(loop);//告诉浏览器在刷新屏幕的时候调用这个函数
+        }
+    </script>
+</body>
+
+</html>
